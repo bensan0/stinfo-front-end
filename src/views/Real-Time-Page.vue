@@ -18,7 +18,7 @@
                 標籤
                 <div class="tag-panel">
                     <div v-for="tag in tags" :key="tag" class="tag-item">
-                        <input type="checkbox" :value="tag" v-model="selectedTags"> {{ tag }} </input>
+                        <input type="checkbox" :value="tag" v-model="extraTags"> {{ tag }} </input>
                     </div>
                 </div>
             </div>
@@ -38,17 +38,26 @@
                             <th>漲跌幅</th>
                             <th>交易量</th>
                             <th>標籤</th>
+                            <th>yahoo</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="item in tableData" :key="item.stockId">
-                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 },'small-text']">{{ item.stockId }}</td>
-                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 },'small-text']">{{ item.stockName }}</td>
+                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 }, 'small-text']">{{
+                                item.stockId }}</td>
+                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 }, 'small-text']">{{
+                                item.stockName }}</td>
                             <td>{{ item.todayClosingPrice }}</td>
-                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 },'small-text']">{{ item.priceGap }}</td>
-                            <td :class="[{ redfont: item.priceGapPercent > 0, greenfont: item.priceGapPercent < 0 },'small-text']">{{ item.priceGapPercent }}</td>
+                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 }, 'small-text']">{{
+                                item.priceGap }}</td>
+                            <td
+                                :class="[{ redfont: item.priceGapPercent > 0, greenfont: item.priceGapPercent < 0 }, 'small-text']">
+                                {{ item.priceGapPercent }}</td>
                             <td>{{ item.todayTradingVolumePiece }}</td>
-                            <td>{{ item.tags }}</td>
+                            <td>{{ item.tags.extraTags }}</td>
+                            <td>
+                                <a :href="getStockUrl(item.stockId, item.type)" target="_blank">連結</a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -70,19 +79,21 @@ export default {
     setup() {
         const tags = ref([])
         const tableData = ref([])
-        const selectedTags = ref([])
 
         const formData = reactive({
             tradingVolumePieceStart: null,
             priceGapPercent: null,
-            selectedTags: []
+            extraTags: []
         })
 
         async function submit() {
             try {
-                const response = await axios.post('http://localhost:8999/gw/stock/v1/stock/condition/real-time/list', formData);
-                if (response.data.data.status === '200') {
-                    tableData.value = response.data.data.list
+                const response = await axios.post(`${apiUrl}/gw/stock/v1/stock/condition/real-time/list`, formData);
+                if (response.data.status === '200') {
+                    tableData.value = response.data.data
+                    for (let data of tableData.value) {
+                        data.tags = JSON.parse(data.tags)
+                    }
                 } else {
                     console.error('Invalid response:', response.data.data);
                 }
@@ -91,9 +102,15 @@ export default {
             }
         }
 
+        function getStockUrl(stockId, type) {
+            const exchange = type === '市' ? '.TW' : '.TWO'
+            return `https://tw.stock.yahoo.com/quote/${stockId}${exchange}/technical-analysis`
+        }
+
         onBeforeMount(async () => {
             try {
-                const response = await axios.get('http://localhost:8999/gw/report/util/tags', { timeout: 2000 });
+                let apiUrl = process.env.VUE_APP_STINFO_BACKEND_API_URL
+                const response = await axios.get(`${apiUrl}/gw/report/util/tags`);
                 if (response.data.status === '200' && response.data.data !== null) {
                     tags.value = response.data.data;
                 } else {
@@ -107,9 +124,9 @@ export default {
         return {
             tags,
             tableData,
-            selectedTags,
             ...toRefs(formData),
-            submit
+            submit,
+            getStockUrl
         }
     }
 }

@@ -5,7 +5,9 @@ export async function checkLogin() {
     if (token == null || token == '') {
         return false
     } else {
-        let response = await axios.post('http://localhost:8999/gw/auth/sign/check-token', {
+        let apiUrl = process.env.VUE_APP_STINFO_BACKEND_API_URL
+        console.log('apiUrl:' + apiUrl)
+        let response = await axios.post(`${apiUrl}/gw/auth/sign/check-token`, {
             token: token
         });
 
@@ -18,7 +20,8 @@ export async function checkLogin() {
 }
 
 export async function login(username, password) {
-    let response = await axios.post('http://localhost:8999/gw/auth/sign/sign-in',
+    let apiUrl = process.env.VUE_APP_STINFO_BACKEND_API_URL
+    let response = await axios.post(`${apiUrl}/gw/auth/sign/sign-in`,
         {
             username: username,
             password: password

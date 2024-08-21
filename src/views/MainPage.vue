@@ -49,7 +49,7 @@
                 標籤
                 <div class="tag-panel">
                     <div v-for="tag in tags" :key="tag" class="tag-item">
-                        <input type="checkbox" :value="tag" v-model="selectedTags"> {{ tag }} </input>
+                        <input type="checkbox" :value="tag" v-model="extraTags"> {{ tag }} </input>
                     </div>
                 </div>
             </div>
@@ -76,33 +76,51 @@
                             <th>昨收</th>
                             <th>價差</th>
                             <th>張跌幅</th>
-                            <th>成交量(張)</th>
+                            <th>成交量</th>
+                            <th>昨成交量</th>
                             <th>交易額</th>
-                            <th>上影</th>
+                            <th>昨交易額</th>
+                            <th>標籤</th>
+                            <th>histock</th>
+                            <!-- <th>上影</th>
                             <th>實體</th>
                             <th>下影</th>
                             <th>5均</th>
                             <th>10均</th>
-                            <th>20均</th>
+                            <th>20均</th> -->
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="item in tableData" :key="item.stockId">
-                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 },'small-text']">{{ item.stockId }}</td>
-                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 },'small-text']">{{ item.stockName }}</td>
+                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 }, 'small-text']">{{
+                                item.stockId }}</td>
+                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 }, 'small-text']">{{
+                                item.stockName }}</td>
                             <td>{{ item.date }}</td>
                             <td>{{ item.todayClosingPrice }}</td>
                             <td>{{ item.yesterdayClosingPrice }}</td>
-                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 },'small-text']">{{ item.priceGap }}</td>
-                            <td :class="[{ redfont: item.priceGapPercent > 0, greenfont: item.priceGapPercent < 0 },'small-text']">{{ item.priceGapPercent }}</td>
+                            <td :class="[{ redfont: item.priceGap > 0, greenfont: item.priceGap < 0 }, 'small-text']">{{
+                                item.priceGap }}</td>
+                            <td
+                                :class="[{ redfont: item.priceGapPercent > 0, greenfont: item.priceGapPercent < 0 }, 'small-text']">
+                                {{ item.priceGapPercent }}</td>
                             <td>{{ item.todayTradingVolumePiece }}</td>
-                            <td>{{ item.todayTradingVolumeMoney }}</td>
-                            <td>{{ item.upperShadow }}</td>
+                            <td>{{ item.yesterdayTradingVolumePiece }}</td>
+                            <td :class="{ redfont: item.todayTradingVolumeMoney > item.yesterdayTradingVolumeMoney }">{{
+                                formatAmount(item.todayTradingVolumeMoney) }}</td>
+                            <td>{{ formatAmount(item.yesterdayTradingVolumeMoney) }}</td>
+                            <td>{{ item.tags.extraTags }}</td>
+                            <td>
+                                <a :href="genHistockLink(item.stockId)" target="_blank">
+                                    其他資訊
+                                </a>
+                            </td>
+                            <!-- <td>{{ item.upperShadow }}</td>
                             <td>{{ item.realBody }}</td>
                             <td>{{ item.lowerShadow }}</td>
                             <td>{{ item.ma5 }}</td>
                             <td>{{ item.ma10 }}</td>
-                            <td>{{ item.ma20 }}</td>
+                            <td>{{ item.ma20 }}</td> -->
                         </tr>
                     </tbody>
                 </table>
@@ -152,7 +170,7 @@ export default {
             tradingVolumeStatus: null,
             conAmountDays: null,
             tradingAmountStatus: null,
-            selectedTags: []
+            extraTags: []
         })
 
         const tableData = ref([])
@@ -172,9 +190,13 @@ export default {
 
         async function submit() {
             try {
-                const response = await axios.post(`http://localhost:8999/gw/stock/v1/stock/condition/list?current=${currentPage.value}&size=${pageSize.value}`, formData);
+                let apiUrl = process.env.VUE_APP_STINFO_BACKEND_API_URL
+                const response = await axios.post(`${apiUrl}/gw/stock/v1/stock/condition/list?current=${currentPage.value}&size=${pageSize.value}`, formData);
                 if (response.data.status === '200') {
                     tableData.value = response.data.data.list
+                    for (let data of tableData.value) {
+                        data.tags = JSON.parse(data.tags)
+                    }
                     prePage.value = response.data.data.prePage
                     currentPage.value = response.data.data.pageNum
                     nextPage.value = response.data.data.nextPage
@@ -188,9 +210,35 @@ export default {
             }
         }
 
+        function formatAmount(amount) {
+            const units = ['', '萬', '億', '兆'];
+            let result = '';
+            let unitIndex = 0;
+
+            while (amount > 0) {
+                const part = amount % 10000;
+                amount = Math.floor(amount / 10000);
+
+                if (part > 0 || unitIndex === 0) {
+                    result = part + units[unitIndex] + result;
+                }
+
+                unitIndex++;
+            }
+
+            return result;
+        }
+
+        function genHistockLink(stockId) {
+
+            return 'https://histock.tw/stock/' + stockId
+
+        }
+
         onBeforeMount(async () => {
             try {
-                const response = await axios.get('http://localhost:8999/gw/report/util/tags');
+                let apiUrl = process.env.VUE_APP_STINFO_BACKEND_API_URL
+                const response = await axios.get(`${apiUrl}/gw/report/util/tags`);
                 if (response.data.status === '200' && response.data.data !== null) {
                     tags.value = response.data.data;
                 } else {
@@ -214,7 +262,9 @@ export default {
             totalPage,
             pageSize,
             displayedPages,
-            changePage
+            changePage,
+            formatAmount,
+            genHistockLink
         }
     }
 }
