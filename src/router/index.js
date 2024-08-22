@@ -1,41 +1,41 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { checkLogin } from '../utils/AuthUtils'
+import { checkLogin } from '@/utils/AuthUtils'
 
 const routes = [
   {
     path: '/',
     name: 'FirstPage',
-    component: () => import('../views/HomePage.vue')
+    component: () => import('@/views/HomePage.vue')
   },
   {
     path: '/home',
     name: 'Home',
-    component: () => import('../views/HomePage.vue')
+    component: () => import('@/views/HomePage.vue')
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/LoginPage.vue')
+    component: () => import('@/views/LoginPage.vue')
   },
   {
     path: '/main',
     name: 'Main',
-    component: () => import('../views/MainPage.vue')
+    component: () => import('@/views/MainPage.vue')
   },
   {
     path: '/real-time',
     name: 'Real-Time',
-    component: () => import('../views/Real-Time-Page.vue')
+    component: () => import('@/views/Real-Time-Page.vue')
   },
   {
     path: '/error-page',
     name: 'Error',
-    component: () => import('../views/ErrorPage.vue')
+    component: () => import('@/views/ErrorPage.vue')
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes
 })
 

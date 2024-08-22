@@ -1,12 +1,13 @@
 <template>
   <div class="left-panel">
+    <div class="top">
+      人恐我貪
+      <img :src="getAssets('images/stareofdora.jpeg')" class="pic" />
+    </div>
     <div class="center">
       <nav>
-        <router-link to="/main">主頁</router-link>
-        <br>
-        <router-link to="/real-time">即時頁</router-link>
-        <br>
-        <router-link to="/"></router-link>
+        <p><router-link to="/main">主頁</router-link></p>
+        <p><router-link to="/real-time">即時頁</router-link></p>
       </nav>
     </div>
     <br>
@@ -23,8 +24,11 @@ import { useRouter } from 'vue-router';
 export default {
   name: 'SideBar',
   setup() {
-
     const router = useRouter()
+
+    function getAssets(file) {
+      return new URL(`../assets/${file}`, import.meta.url).href;
+    }
 
     function handleLogout() {
       logout()
@@ -32,7 +36,8 @@ export default {
     }
 
     return {
-      handleLogout
+      handleLogout,
+      getAssets
     }
   }
 }
@@ -50,6 +55,15 @@ export default {
   /* 添加一些上下內邊距 */
   box-sizing: border-box;
   bottom: 0;
+  align-items: center
+}
+
+.top{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 .center {
@@ -61,10 +75,11 @@ export default {
 }
 
 .bottom {
-  margin-top: auto;
+  /* margin-top: auto; */
   /* 將底部元素推到面板底部 */
   padding: 0 10px;
   /* 添加一些左右內邊距 */
+  align-items: center
 }
 
 nav {
@@ -101,5 +116,9 @@ nav a.router-link-exact-active {
 .button:hover {
   background-color: #3aa876;
   /* 滑鼠懸停時的顏色 */
+}
+
+.pic{
+  width: 70%;
 }
 </style>

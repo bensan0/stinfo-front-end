@@ -2,7 +2,7 @@ const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
   transpileDependencies: true,
   lintOnSave: false,
-  publicPath: process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test'
+  publicPath: import.meta.env.MODE === 'production' || import.meta.env.MODE === 'test'
     ? './'
     : '/'
 })

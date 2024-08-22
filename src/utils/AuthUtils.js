@@ -5,8 +5,7 @@ export async function checkLogin() {
     if (token == null || token == '') {
         return false
     } else {
-        let apiUrl = process.env.VUE_APP_STINFO_BACKEND_API_URL
-        console.log('apiUrl:' + apiUrl)
+        let apiUrl = import.meta.env.VITE_STINFO_BACKEND_API_URL
         let response = await axios.post(`${apiUrl}/gw/auth/sign/check-token`, {
             token: token
         });
@@ -20,7 +19,7 @@ export async function checkLogin() {
 }
 
 export async function login(username, password) {
-    let apiUrl = process.env.VUE_APP_STINFO_BACKEND_API_URL
+    let apiUrl = import.meta.env.VITE_STINFO_BACKEND_API_URL
     let response = await axios.post(`${apiUrl}/gw/auth/sign/sign-in`,
         {
             username: username,

@@ -2,18 +2,19 @@
     <div class="main-container">
         <SideBar class="sidebar" />
         <div class="content">
-            <div class="inputs-container">
-                <div class="input">
-                    交易量(張)
-                    <input type="number" v-model="tradingVolumePieceStart">
-                </div>
+            <div class="dashbord">
+                <div class="inputs-container">
+                    <div class="input">
+                        交易量(張)
+                        <input type="number" v-model="tradingVolumePieceStart">
+                    </div>
 
-                <div class="input">
-                    漲跌幅(%)
-                    <input type="number" v-model="priceGapPercent">
+                    <div class="input">
+                        漲跌幅(%)
+                        <input type="number" v-model="priceGapPercent">
+                    </div>
                 </div>
             </div>
-
             <div class="tag-container">
                 標籤
                 <div class="tag-panel">
@@ -88,7 +89,7 @@ export default {
 
         async function submit() {
             try {
-                let apiUrl = process.env.VUE_APP_STINFO_BACKEND_API_URL
+                let apiUrl = import.meta.env.VITE_STINFO_BACKEND_API_URL
                 const response = await axios.post(`${apiUrl}/gw/stock/v1/stock/condition/real-time/list`, formData);
                 if (response.data.status === '200') {
                     tableData.value = response.data.data
@@ -97,6 +98,7 @@ export default {
                     }
                 } else {
                     console.error('Invalid response:', response.data.data);
+                    alert(response.data.msg)
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -110,7 +112,7 @@ export default {
 
         onBeforeMount(async () => {
             try {
-                let apiUrl = process.env.VUE_APP_STINFO_BACKEND_API_URL
+                let apiUrl = import.meta.env.VITE_STINFO_BACKEND_API_URL
                 const response = await axios.get(`${apiUrl}/gw/report/util/tags`);
                 if (response.data.status === '200' && response.data.data !== null) {
                     tags.value = response.data.data;
@@ -155,10 +157,15 @@ export default {
     /* 添加間距 */
 }
 
-.inputs-container,
-.tag-container,
-.last-container {
+.dashbord {
     width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+.dashbord-item {
+    border: solid;
 }
 
 .inputs-container {
@@ -166,17 +173,23 @@ export default {
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
+    background-color: antiquewhite;
 }
 
 .input {
     justify-content: flex-start
 }
 
+.tag-container,
+.last-container {
+    width: 100%;
+}
+
 .tag-panel {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    /* background-color: blue; */
+    background-color: antiquewhite;
 }
 
 .tag-container {
@@ -187,7 +200,7 @@ export default {
 }
 
 .tag-item {
-    width: calc(20% - 10px);
+    /* width: calc(20% - 10px); */
     font-size: x-small;
     /* 每行5個，考慮間距 */
 }
