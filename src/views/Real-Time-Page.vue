@@ -88,6 +88,7 @@ export default {
 
         async function submit() {
             try {
+                let apiUrl = process.env.VUE_APP_STINFO_BACKEND_API_URL
                 const response = await axios.post(`${apiUrl}/gw/stock/v1/stock/condition/real-time/list`, formData);
                 if (response.data.status === '200') {
                     tableData.value = response.data.data
