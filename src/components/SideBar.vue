@@ -2,7 +2,8 @@
   <div class="left-panel">
     <div class="top">
       人恐我貪
-      <img :src="getAssets('images/stareofdora.jpeg')" class="pic" />
+      <!-- <img :src="getAssets('images/stareofdora.jpeg')" class="pic" /> -->
+       <img :src="stareofdora" class="pic" />
     </div>
     <div class="center">
       <nav>
@@ -20,6 +21,7 @@
 <script>
 import { logout } from '@/utils/AuthUtils';
 import { useRouter } from 'vue-router';
+import stareofdora from '@/assets/images/stareofdora.jpeg';
 
 export default {
   name: 'SideBar',
@@ -37,7 +39,8 @@ export default {
 
     return {
       handleLogout,
-      getAssets
+      getAssets,
+      stareofdora
     }
   }
 }

@@ -45,8 +45,32 @@
                         </select>
                     </div>
                 </div>
-                <div class="dashbord-item">大盤</div>
-                <div class="dashbord-item">小盤</div>
+                <div class="dashbord-item" v-if="listed !== null">
+                    加權指數
+                    <span>日期:{{ listed.date }}</span>
+                    <span>成交:{{ listed.todayClosing }}</span>
+                    <span>昨日成交:{{ listed.yesterdayClosing }}</span>
+                    <span :class="{ redfont: listed.gap > 0, greenfont: listed.gap < 0 }">漲跌:{{ listed.gap }}</span>
+                    <span :class="{ redfont: listed.gapPercent > 0, greenfont: listed.gapPercent < 0 }">漲跌幅:{{ listed.gapPercent }}</span>
+                    <span>開盤:{{ listed.opening }}</span>
+                    <span>最高:{{ listed.highest }}</span>
+                    <span>最低:{{ listed.lowest }}</span>
+                    <span>成交量:{{ listed.todayTradingVolume }}</span>
+                    <span>成交金額:{{ formatAmount(listed.todayTradingAmount) }}</span>
+                </div>
+                <div class="dashbord-item" v-if="otc !== null">
+                    櫃買指數
+                    <span>日期:{{ otc.date }}</span>
+                    <span>成交:{{ otc.todayClosing }}</span>
+                    <span>昨日成交:{{ otc.yesterdayClosing }}</span>
+                    <span :class="{ redfont: otc.gap > 0, greenfont: otc.gap < 0 }">漲跌:{{ otc.gap }}</span>
+                    <span :class="{ redfont: otc.gapPercent > 0, greenfont: otc.gapPercent < 0 }">漲跌幅:{{ otc.gapPercent }}</span>
+                    <span>開盤:{{ otc.opening }}</span>
+                    <span>最高:{{ otc.highest }}</span>
+                    <span>最低:{{ otc.lowest }}</span>
+                    <span>成交量:{{ otc.todayTradingVolume }}</span>
+                    <span>成交金額:{{ formatAmount(otc.todayTradingAmount) }}</span>
+                </div>
             </div>
 
 
@@ -109,11 +133,11 @@
                             <td
                                 :class="[{ redfont: item.priceGapPercent > 0, greenfont: item.priceGapPercent < 0 }, 'small-text']">
                                 {{ item.priceGapPercent }}</td>
-                            <td>{{ item.todayTradingVolumePiece }}</td>
+                            <td :class="{ redfont: item.todayTradingVolumePiece > item.yesterdayTradingVolumePiece, greenfont: item.todayTradingVolumePiece < item.yesterdayTradingVolumePiece }">{{ item.todayTradingVolumePiece }}</td>
                             <td>{{ item.yesterdayTradingVolumePiece }}</td>
-                            <td :class="{ redfont: item.todayTradingVolumeMoney > item.yesterdayTradingVolumeMoney }">{{
+                            <td :class="{ redfont: item.todayTradingVolumeMoney > item.yesterdayTradingVolumeMoney, greenfont: item.todayTradingVolumeMoney < item.yesterdayTradingVolumeMoney }">{{
                                 formatAmount(item.todayTradingVolumeMoney) }}</td>
-                            <td>{{ formatAmount(item.yesterdayTradingVolumeMoney) }}</td>
+                            <td >{{ formatAmount(item.yesterdayTradingVolumeMoney) }}</td>
                             <td>{{ item.tags.extraTags }}</td>
                             <td>
                                 <a :href="genHistockLink(item.stockId)" target="_blank">
@@ -185,6 +209,8 @@ export default {
         const totalPage = ref(0)
         const pageSize = ref(10)
         const displayedPages = ref([])
+        const otc = ref(null)
+        const listed = ref(null)
 
         function changePage(page) {
             if (page >= 1 && page <= totalPage.value) {
@@ -221,7 +247,10 @@ export default {
             let unitIndex = 0;
 
             while (amount > 0) {
-                const part = amount % 10000;
+                let part = amount % 10000;
+                if(part === 0){
+                    part = ''
+                }
                 amount = Math.floor(amount / 10000);
 
                 if (part > 0 || unitIndex === 0) {
@@ -249,6 +278,17 @@ export default {
                 } else {
                     alert(response.data.msg)
                 }
+
+                const index = await axios.get(`${apiUrl}/gw/stock/v1/stock/index/latest`)
+                if (index.data.status === '200' && index.data.data !== null) {
+                    if (index.data.data[0].indexName === '加權指數') {
+                        listed.value = index.data.data[0]
+                        otc.value = index.data.data[1]
+                    } else {
+                        listed.value = index.data.data[1]
+                        otc.value = index.data.data[0]
+                    }
+                }
             } catch (error) {
                 alert('服務暫時不可用，請稍後再試。')
             }
@@ -269,7 +309,9 @@ export default {
             displayedPages,
             changePage,
             formatAmount,
-            genHistockLink
+            genHistockLink,
+            listed,
+            otc
         }
     }
 }
@@ -305,7 +347,11 @@ export default {
 }
 
 .dashbord-item {
-    border: solid;
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    /* border: solid; */
+    background-color: antiquewhite;
 }
 
 .inputs-container {
