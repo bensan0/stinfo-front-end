@@ -47,12 +47,13 @@ router.beforeEach(async (to) => {
       if (!isLoggedIn) {
         return { name: 'Login' };
       }
-    } else if (to.name === 'Login') {
-      const isLoggedIn = await checkLogin();
-      if (isLoggedIn) {
-        return { name: 'Main' }
-      }
-    }
+    } 
+    // else if (to.name === 'Login') {
+    //   const isLoggedIn = await checkLogin();
+    //   if (isLoggedIn) {
+    //     return { name: 'Main' }
+    //   }
+    // }
   } catch (error) {
     console.error('Navigation guard error:', error);
     return { name: 'Error', params: { message: '服務暫時不可用，請稍後再試。' } };

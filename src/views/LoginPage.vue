@@ -12,9 +12,9 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { onBeforeMount, ref } from 'vue'
 import { useRouter } from 'vue-router';
-import { login } from '@/utils/AuthUtils';
+import { login, checkLogin } from '@/utils/AuthUtils';
 
 export default {
     name: 'LoginPage',
@@ -27,9 +27,10 @@ export default {
         async function handleLogin() {
             try {
                 const response = await login(username.value, password.value)
-            
+
                 if (response.data.status === '200' && response.data.data !== null) {
                     localStorage.setItem('token', response.data.data)
+                    localStorage.setItem('username', username.value)
                     router.push("/main")
                 } else {
                     alert(response.data.msg)
@@ -45,6 +46,17 @@ export default {
             username.value = null
             password.value = null
         }
+
+        onBeforeMount(async () => {
+            try {
+                const isLoggedIn = await checkLogin();
+                if (isLoggedIn) {
+                    router.push({ name: 'Main' })
+                }
+            } catch (error) {
+                alert('服務暫時不可用，請稍後再試。')
+            }
+        })
 
         return {
             username,

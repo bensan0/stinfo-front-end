@@ -51,7 +51,8 @@
                     <span>成交:{{ listed.todayClosing }}</span>
                     <span>昨日成交:{{ listed.yesterdayClosing }}</span>
                     <span :class="{ redfont: listed.gap > 0, greenfont: listed.gap < 0 }">漲跌:{{ listed.gap }}</span>
-                    <span :class="{ redfont: listed.gapPercent > 0, greenfont: listed.gapPercent < 0 }">漲跌幅:{{ listed.gapPercent }}</span>
+                    <span :class="{ redfont: listed.gapPercent > 0, greenfont: listed.gapPercent < 0 }">漲跌幅:{{
+                        listed.gapPercent }}%</span>
                     <span>開盤:{{ listed.opening }}</span>
                     <span>最高:{{ listed.highest }}</span>
                     <span>最低:{{ listed.lowest }}</span>
@@ -64,7 +65,8 @@
                     <span>成交:{{ otc.todayClosing }}</span>
                     <span>昨日成交:{{ otc.yesterdayClosing }}</span>
                     <span :class="{ redfont: otc.gap > 0, greenfont: otc.gap < 0 }">漲跌:{{ otc.gap }}</span>
-                    <span :class="{ redfont: otc.gapPercent > 0, greenfont: otc.gapPercent < 0 }">漲跌幅:{{ otc.gapPercent }}</span>
+                    <span :class="{ redfont: otc.gapPercent > 0, greenfont: otc.gapPercent < 0 }">漲跌幅:{{ otc.gapPercent
+                        }}%</span>
                     <span>開盤:{{ otc.opening }}</span>
                     <span>最高:{{ otc.highest }}</span>
                     <span>最低:{{ otc.lowest }}</span>
@@ -133,11 +135,15 @@
                             <td
                                 :class="[{ redfont: item.priceGapPercent > 0, greenfont: item.priceGapPercent < 0 }, 'small-text']">
                                 {{ item.priceGapPercent }}</td>
-                            <td :class="{ redfont: item.todayTradingVolumePiece > item.yesterdayTradingVolumePiece, greenfont: item.todayTradingVolumePiece < item.yesterdayTradingVolumePiece }">{{ item.todayTradingVolumePiece }}</td>
+                            <td
+                                :class="{ redfont: item.todayTradingVolumePiece > item.yesterdayTradingVolumePiece, greenfont: item.todayTradingVolumePiece < item.yesterdayTradingVolumePiece }">
+                                {{ item.todayTradingVolumePiece }}</td>
                             <td>{{ item.yesterdayTradingVolumePiece }}</td>
-                            <td :class="{ redfont: item.todayTradingVolumeMoney > item.yesterdayTradingVolumeMoney, greenfont: item.todayTradingVolumeMoney < item.yesterdayTradingVolumeMoney }">{{
-                                formatAmount(item.todayTradingVolumeMoney) }}</td>
-                            <td >{{ formatAmount(item.yesterdayTradingVolumeMoney) }}</td>
+                            <td
+                                :class="{ redfont: item.todayTradingVolumeMoney > item.yesterdayTradingVolumeMoney, greenfont: item.todayTradingVolumeMoney < item.yesterdayTradingVolumeMoney }">
+                                {{
+                                    formatAmount(item.todayTradingVolumeMoney) }}</td>
+                            <td>{{ formatAmount(item.yesterdayTradingVolumeMoney) }}</td>
                             <td>{{ item.tags.extraTags }}</td>
                             <td>
                                 <a :href="genHistockLink(item.stockId)" target="_blank">
@@ -171,7 +177,7 @@
 
 <script>
 import SideBar from '@/components/SideBar.vue';
-import { reactive, ref, toRefs, onBeforeMount } from 'vue';
+import { reactive, ref, toRefs, onBeforeMount, watchEffect, onUnmounted } from 'vue';
 import axios from 'axios';
 
 export default {
@@ -211,6 +217,7 @@ export default {
         const displayedPages = ref([])
         const otc = ref(null)
         const listed = ref(null)
+        const apiUrl = ref(import.meta.env.VITE_STINFO_BACKEND_API_URL)
 
         function changePage(page) {
             if (page >= 1 && page <= totalPage.value) {
@@ -221,8 +228,7 @@ export default {
 
         async function submit() {
             try {
-                let apiUrl = import.meta.env.VITE_STINFO_BACKEND_API_URL
-                const response = await axios.post(`${apiUrl}/gw/stock/v1/stock/condition/list?current=${currentPage.value}&size=${pageSize.value}`, formData);
+                const response = await axios.post(`${apiUrl.value}/gw/stock/v1/stock/condition/list?current=${currentPage.value}&size=${pageSize.value}`, formData);
                 if (response.data.status === '200') {
                     tableData.value = response.data.data.list
                     for (let data of tableData.value) {
@@ -248,7 +254,7 @@ export default {
 
             while (amount > 0) {
                 let part = amount % 10000;
-                if(part === 0){
+                if (part === 0) {
                     part = ''
                 }
                 amount = Math.floor(amount / 10000);
@@ -269,31 +275,44 @@ export default {
 
         }
 
+        async function getIndex() {
+            const index = await axios.get(`${apiUrl.value}/gw/stock/v1/stock/index/latest`)
+            if (index.data.status === '200' && index.data.data !== null) {
+                if (index.data.data[0].indexName === '加權指數') {
+                    listed.value = index.data.data[0]
+                    otc.value = index.data.data[1]
+                } else {
+                    listed.value = index.data.data[1]
+                    otc.value = index.data.data[0]
+                }
+            }
+        }
+
         onBeforeMount(async () => {
             try {
-                let apiUrl = import.meta.env.VITE_STINFO_BACKEND_API_URL
-                const response = await axios.get(`${apiUrl}/gw/report/util/tags`);
+                const response = await axios.get(`${apiUrl.value}/gw/report/util/tags`);
                 if (response.data.status === '200' && response.data.data !== null) {
                     tags.value = response.data.data;
                 } else {
                     alert(response.data.msg)
                 }
 
-                const index = await axios.get(`${apiUrl}/gw/stock/v1/stock/index/latest`)
-                if (index.data.status === '200' && index.data.data !== null) {
-                    if (index.data.data[0].indexName === '加權指數') {
-                        listed.value = index.data.data[0]
-                        otc.value = index.data.data[1]
-                    } else {
-                        listed.value = index.data.data[1]
-                        otc.value = index.data.data[0]
-                    }
-                }
+                getIndex()
+
             } catch (error) {
                 alert('服務暫時不可用，請稍後再試。')
             }
         })
 
+        let intervalId;
+
+        watchEffect(() => {
+            intervalId = setInterval(getIndex, 30000);
+        });
+
+        onUnmounted(() => {
+            clearInterval(intervalId);
+        });
 
         return {
             tags,
@@ -320,7 +339,7 @@ export default {
 <style scoped>
 .main-container {
     display: flex;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 .sidebar {

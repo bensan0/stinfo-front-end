@@ -13,12 +13,14 @@
     </div>
     <br>
     <div class="bottom">
+      <div><p class="bold-text">用戶: {{ username }}</p></div>
       <button @click="handleLogout" class="button">登出</button>
     </div>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue'
 import { logout } from '@/utils/AuthUtils';
 import { useRouter } from 'vue-router';
 import stareofdora from '@/assets/images/stareofdora.jpeg';
@@ -27,6 +29,8 @@ export default {
   name: 'SideBar',
   setup() {
     const router = useRouter()
+
+    const username = ref(localStorage.getItem('username'))
 
     function getAssets(file) {
       return new URL(`../assets/${file}`, import.meta.url).href;
@@ -40,7 +44,8 @@ export default {
     return {
       handleLogout,
       getAssets,
-      stareofdora
+      stareofdora,
+      username
     }
   }
 }
@@ -56,9 +61,8 @@ export default {
   justify-content: space-between;
   padding: 20px 0;
   /* 添加一些上下內邊距 */
-  box-sizing: border-box;
+  align-items: center;
   bottom: 0;
-  align-items: center
 }
 
 .top{
@@ -123,5 +127,9 @@ nav a.router-link-exact-active {
 
 .pic{
   width: 70%;
+}
+
+.bold-text{
+  font-weight: bold;
 }
 </style>
