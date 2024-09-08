@@ -4,8 +4,8 @@
         <div class="content">
             <div class="changePass-container">
                 <div>變更密碼</div>
-                <div>現在密碼: <input type="text" v-model="nowPassword" /></div>
-                <div>新密碼: <input type="text" v-model="newPassword" /></div>
+                <div>現在密碼: <input type="password" v-model="nowPassword" /></div>
+                <div>新密碼: <input type="password" v-model="newPassword" /></div>
                 <button @click="changePassword" class="button">變更</button>
             </div>
         </div>
@@ -32,8 +32,9 @@ export default {
 
         async function changePassword() {
             try {
+                let apiUrl = import.meta.env.VITE_STINFO_BACKEND_API_URL
                 const response = await axios.post(
-                    `${apiUrl.value}/gw/auth/sign/change-password`,
+                    `${apiUrl}/gw/auth/sign/change-password`,
                     {
                         nowPassword: nowPassword.value,
                         newPassword: newPassword.value,
