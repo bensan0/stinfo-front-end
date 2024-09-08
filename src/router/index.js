@@ -28,6 +28,11 @@ const routes = [
     component: () => import('@/views/Real-Time-Page.vue')
   },
   {
+    path: '/me',
+    name: 'MyPage',
+    component: () => import('@/views/MyPage.vue')
+  },
+  {
     path: '/error-page',
     name: 'Error',
     component: () => import('@/views/ErrorPage.vue')
@@ -47,7 +52,7 @@ router.beforeEach(async (to) => {
       if (!isLoggedIn) {
         return { name: 'Login' };
       }
-    } 
+    }
     // else if (to.name === 'Login') {
     //   const isLoggedIn = await checkLogin();
     //   if (isLoggedIn) {

@@ -9,6 +9,7 @@
       <nav>
         <p><router-link to="/main">主頁</router-link></p>
         <p><router-link to="/real-time">即時頁</router-link></p>
+        <p><router-link to="/me">我的頁面</router-link></p>
       </nav>
     </div>
     <br>

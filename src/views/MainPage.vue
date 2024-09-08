@@ -14,36 +14,6 @@
                         漲跌幅(%)
                         <input type="number" v-model="priceGapPercent">
                     </div>
-
-                    <div class="input">
-                        價格連
-                        <input type="number" v-model="conPriceDays">天
-                        <select v-model="conPriceStatus">
-                            <option v-for="option in statusOptions" :key="option.value" :value="option.value">
-                                {{ option.label }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="input">
-                        交易量連
-                        <input type="number" v-model="conVolDays">天
-                        <select v-model="tradingVolumeStatus">
-                            <option v-for="option in statusOptions" :key="option.value" :value="option.value">
-                                {{ option.label }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="input">
-                        交易額連
-                        <input type="number" v-model="conAmountDays">天
-                        <select v-model="tradingAmountStatus">
-                            <option v-for="option in statusOptions" :key="option.value" :value="option.value">
-                                {{ option.label }}
-                            </option>
-                        </select>
-                    </div>
                 </div>
                 <div class="dashbord-item" v-if="listed !== null">
                     加權指數
@@ -113,12 +83,6 @@
                             <th>昨交易額</th>
                             <th>標籤</th>
                             <th>histock</th>
-                            <!-- <th>上影</th>
-                            <th>實體</th>
-                            <th>下影</th>
-                            <th>5均</th>
-                            <th>10均</th>
-                            <th>20均</th> -->
                         </tr>
                     </thead>
                     <tbody>
@@ -150,12 +114,6 @@
                                     其他資訊
                                 </a>
                             </td>
-                            <!-- <td>{{ item.upperShadow }}</td>
-                            <td>{{ item.realBody }}</td>
-                            <td>{{ item.lowerShadow }}</td>
-                            <td>{{ item.ma5 }}</td>
-                            <td>{{ item.ma10 }}</td>
-                            <td>{{ item.ma20 }}</td> -->
                         </tr>
                     </tbody>
                 </table>
@@ -188,23 +146,10 @@ export default {
     setup() {
         const tags = ref([])
 
-        const statusOptions = ref([
-            { value: null, label: '請選擇' },
-            { value: '漲', label: '漲' },
-            { value: '跌', label: '跌' },
-            { value: '平', label: '平' }
-        ])
-
         const formData = reactive({
             tradingVolumePieceStart: null,
             tradingVolumePieceEnd: null,
             priceGapPercent: null,
-            conPriceDays: null,
-            conPriceStatus: null,
-            conVolDays: null,
-            tradingVolumeStatus: null,
-            conAmountDays: null,
-            tradingAmountStatus: null,
             extraTags: []
         })
 
@@ -316,7 +261,6 @@ export default {
 
         return {
             tags,
-            statusOptions,
             ...toRefs(formData),
             submit,
             tableData,

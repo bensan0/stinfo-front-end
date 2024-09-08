@@ -66,6 +66,7 @@
                             <th>差額</th>
                             <th>漲跌幅</th>
                             <th>交易量</th>
+                            <th>昨交易量</th>
                             <th>標籤</th>
                             <th>yahoo</th>
                         </tr>
@@ -83,6 +84,7 @@
                                 :class="[{ redfont: item.priceGapPercent > 0, greenfont: item.priceGapPercent < 0 }, 'small-text']">
                                 {{ item.priceGapPercent }}</td>
                             <td>{{ item.todayTradingVolumePiece }}</td>
+                            <td>{{ item.yesterdayTradingVolumePiece }}</td>
                             <td>{{ item.tags.extraTags }}</td>
                             <td>
                                 <a :href="getStockUrl(item.stockId, item.type)" target="_blank">連結</a>
