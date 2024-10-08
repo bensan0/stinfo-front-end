@@ -13,6 +13,11 @@
                         漲跌幅(%)
                         <input type="number" v-model="priceGapPercent">
                     </div>
+
+                    <div class="input">
+                        只顯示今日交易量 > 昨日交易量的股票
+                        <input type="checkbox" v-model="showHigherVolume">
+                    </div>
                 </div>
                 <div class="dashbord-item" v-if="listed !== null">
                     加權指數
@@ -67,6 +72,9 @@
                             <th>漲跌幅</th>
                             <th>交易量</th>
                             <th>昨交易量</th>
+                            <th>上影</th>
+                            <th>實體</th>
+                            <th>下影</th>
                             <th>標籤</th>
                             <th>yahoo</th>
                         </tr>
@@ -82,9 +90,14 @@
                                 item.priceGap }}</td>
                             <td
                                 :class="[{ redfont: item.priceGapPercent > 0, greenfont: item.priceGapPercent < 0 }, 'small-text']">
-                                {{ item.priceGapPercent }}</td>
-                            <td>{{ item.todayTradingVolumePiece }}</td>
+                                {{ item.priceGapPercent }}%</td>
+                            <td
+                                :class="{ redfont: Number(item.todayTradingVolumePiece) > Number(item.yesterdayTradingVolumePiece), greenfont: Number(item.todayTradingVolumePiece) < Number(item.yesterdayTradingVolumePiece) }">
+                                {{ item.todayTradingVolumePiece }}</td>
                             <td>{{ item.yesterdayTradingVolumePiece }}</td>
+                            <td>{{ item.upperShadow }}%</td>
+                            <td>{{ item.realBody }}%</td>
+                            <td>{{ item.lowerShadow }}%</td>
                             <td>{{ item.tags.extraTags }}</td>
                             <td>
                                 <a :href="getStockUrl(item.stockId, item.type)" target="_blank">連結</a>
@@ -113,6 +126,7 @@ export default {
         const otc = ref(null)
         const listed = ref(null)
         const apiUrl = ref(import.meta.env.VITE_STINFO_BACKEND_API_URL)
+        const showHigherVolume = ref(false)
 
         const formData = reactive({
             tradingVolumePieceStart: null,
@@ -125,6 +139,11 @@ export default {
                 const response = await axios.post(`${apiUrl.value}/gw/stock/v1/stock/condition/real-time/list`, formData);
                 if (response.data.status === '200') {
                     tableData.value = response.data.data
+                    if (this.showHigherVolume) {
+                        tableData.value = tableData.value.filter(item =>
+                            Number(item.todayTradingVolumePiece) > Number(item.yesterdayTradingVolumePiece)
+                        );
+                    }
                     for (let data of tableData.value) {
                         data.tags = JSON.parse(data.tags)
                     }
@@ -212,7 +231,8 @@ export default {
             getStockUrl,
             formatAmount,
             listed,
-            otc
+            otc,
+            showHigherVolume
         }
     }
 }
